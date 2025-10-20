@@ -1,24 +1,7 @@
+
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-
-const LATEST_PRICES_ENDPOINT = 'https://api.porssisahko.net/v2/latest-prices.json';
-
-async function fetchLatestPriceData() {
-  const response = await fetch(LATEST_PRICES_ENDPOINT);
-  return response.json();
-}
-
-function getPriceForDate(date, prices) {
-  const matchingPriceEntry = prices.find(
-    (price) => new Date(price.startDate) <= date && new Date(price.endDate) > date
-  );
-
-  if (!matchingPriceEntry) {
-    throw new Error('Price for the requested date is missing');
-  }
-
-  return matchingPriceEntry.price;
-}
+import { fetchLatestPriceData, getPriceForDate } from './src/api/currentPriceApi';
 
 export default function App() {
   const [price, setPrice] = useState(null);
