@@ -1,20 +1,36 @@
-
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { fetchLatestPriceData, getPriceForDate } from './api/CurrentPriceApi'
+import { fetchLatestPriceData } from './api/CurrentPriceApi';
+import CountUp from './CountUp';
 
 export default function HomeScreen() {
   const [price, setPrice] = useState(null);
   const [error, setError] = useState(null);
-  const [paticularPrice, setPaticularPrice] = useState(null);
 
   useEffect(() => {
     async function loadPrice() {
       try {
-        const { prices } = await fetchLatestPriceData();
+        const data = await fetchLatestPriceData();
+
+        const prices = data.prices;
+
+        if (!Array.isArray(prices) || prices.length === 0) {
+          throw new Error("Ei löytynyt hintatietoja");
+        }
+
+        // Katsoo nykyisen ajan tosiaan
         const now = new Date();
-        const p = getPriceForDate(now, prices);
-        setPrice(p);
+
+        // Etsi se hinta-objekti, jonka aikaväli kattaa nyt
+        const current = prices.find(p => {
+          const start = new Date(p.startDate);
+          const end = new Date(p.endDate);
+          return now >= start && now < end;
+        });
+
+        // Jos ei löytynyt, ota esim. ensimmäinen
+        const selected = current ?? prices[0];
+        setPrice(selected.price);
       } catch (e) {
         setError(e.message);
       }
@@ -41,9 +57,15 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.priceText}>
-        Hinta nyt: {price} snt / kWh (sis. alv)
-      </Text>
+      <Text style={styles.title}>Hinta nyt:</Text>
+      <CountUp
+        from={0}
+        to={price}
+        duration={10000} 
+        separator=","    
+        style={styles.priceText}
+      />
+      <Text style={styles.unitText}>snt / kWh (sis. alv)</Text>
     </View>
   );
 }
