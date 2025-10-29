@@ -6,6 +6,7 @@ import { fetchLatestPriceData, getPriceForDate } from './api/CurrentPriceApi'
 export default function HomeScreen() {
   const [price, setPrice] = useState(null);
   const [error, setError] = useState(null);
+  const [paticularPrice, setPaticularPrice] = useState(null);
 
   useEffect(() => {
     async function loadPrice() {
