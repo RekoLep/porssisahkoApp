@@ -21,7 +21,7 @@ export default function App() {
           options={{
             tabBarIcon: ({ focused }) => (
               <Text style={{ fontSize: 22 }}>
-                {'🏠'}
+                {'⚡'}
               </Text>
             ),
           }}

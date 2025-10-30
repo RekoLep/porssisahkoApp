@@ -61,7 +61,7 @@ export default function HomeScreen() {
       <CountUp
         from={0}
         to={price}
-        duration={10000} 
+        duration={1500} 
         separator=","    
         style={styles.priceText}
       />

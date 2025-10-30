@@ -4,7 +4,7 @@ import { Animated, Text } from 'react-native';
 export default function CountUp({
   from = 0,
   to,
-  duration = 1000, // ms
+  duration = 1000, // millisekuntteja
   style,
   separator = '',
   onEnd
