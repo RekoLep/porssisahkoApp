@@ -1,38 +1,49 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TextStyle, ViewStyle } from 'react-native';
 import { fetchLatestPriceData } from './api/CurrentPriceApi';
 import CountUp from './CountUp';
 
+// Tyypit datalle, jonka API palauttaa
+interface PriceItem {
+  startDate: string;
+  endDate: string;
+  price: number;
+}
+
+interface PriceDataResponse {
+  prices: PriceItem[];
+}
+
 export default function HomeScreen() {
-  const [price, setPrice] = useState(null);
-  const [error, setError] = useState(null);
+  const [price, setPrice] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadPrice() {
       try {
-        const data = await fetchLatestPriceData();
+        const data: PriceDataResponse = await fetchLatestPriceData();
 
         const prices = data.prices;
 
         if (!Array.isArray(prices) || prices.length === 0) {
-          throw new Error("Ei löytynyt hintatietoja");
+          throw new Error('Ei löytynyt hintatietoja');
         }
 
-        // Katsoo nykyisen ajan tosiaan
         const now = new Date();
 
-        // Etsi se hinta-objekti, jonka aikaväli kattaa nyt
-        const current = prices.find(p => {
+        // Etsi se hinta, jonka aikaväli kattaa nykyhetken
+        const current = prices.find((p) => {
           const start = new Date(p.startDate);
           const end = new Date(p.endDate);
           return now >= start && now < end;
         });
 
-        // Jos ei löytynyt, ota esim. ensimmäinen
         const selected = current ?? prices[0];
         setPrice(selected.price);
-      } catch (e) {
-        setError(e.message);
+      } catch (e: unknown) {
+        const message =
+          e instanceof Error ? e.message : 'Tuntematon virhe hinnan haussa';
+        setError(message);
       }
     }
 
@@ -61,8 +72,8 @@ export default function HomeScreen() {
       <CountUp
         from={0}
         to={price}
-        duration={1500} 
-        separator=","    
+        duration={1500}
+        separator=","
         style={styles.priceText}
       />
       <Text style={styles.unitText}>snt / kWh (sis. alv)</Text>
@@ -70,7 +81,15 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+interface Styles {
+  container: ViewStyle;
+  priceText: TextStyle;
+  error: TextStyle;
+  title: TextStyle;
+  unitText: TextStyle;
+}
+
+const styles = StyleSheet.create<Styles>({
   container: {
     flex: 1,
     alignItems: 'center',
@@ -82,5 +101,13 @@ const styles = StyleSheet.create({
   },
   error: {
     color: 'red',
+  },
+  title: {
+    fontSize: 18,
+    marginBottom: 4,
+  },
+  unitText: {
+    fontSize: 14,
+    color: '#555',
   },
 });

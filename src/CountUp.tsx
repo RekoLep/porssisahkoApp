@@ -1,16 +1,25 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Text } from 'react-native';
+import { Animated, Text, TextStyle } from 'react-native';
+
+interface CountUpProps {
+  from?: number;
+  to: number;
+  duration?: number; // millisekunteina
+  style?: TextStyle;
+  separator?: string;
+  onEnd?: () => void;
+}
 
 export default function CountUp({
   from = 0,
   to,
-  duration = 1000, // millisekuntteja
+  duration = 1000,
   style,
   separator = '',
-  onEnd
-}) {
+  onEnd,
+}: CountUpProps) {
   const animatedValue = useRef(new Animated.Value(from)).current;
-  const [displayValue, setDisplayValue] = useState(from);
+  const [displayValue, setDisplayValue] = useState<string | number>(from);
 
   useEffect(() => {
     Animated.timing(animatedValue, {
@@ -29,8 +38,10 @@ export default function CountUp({
       setDisplayValue(formatted);
     });
 
-    return () => animatedValue.removeListener(listener);
-  }, [to]);
+    return () => {
+      animatedValue.removeListener(listener);
+    };
+  }, [to, duration, separator, onEnd, animatedValue]);
 
   return <Text style={style}>{displayValue}</Text>;
 }

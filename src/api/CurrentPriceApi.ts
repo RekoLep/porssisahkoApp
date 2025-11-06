@@ -1,8 +1,6 @@
-// api/fetchLatestPriceData.ts
 
 const LATEST_PRICES_ENDPOINT = 'https://api.porssisahko.net/v2/latest-prices.json';
 
-// Tyypit tähän samaan tiedostoon:
 interface ElectricityPrice {
   startDate: string;
   endDate: string;
