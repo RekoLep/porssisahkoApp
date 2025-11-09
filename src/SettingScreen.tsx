@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View, ViewStyle, TextStyle } from 'react-native';
+import styles from './Style';
 
 export default function SettingScreen(){
   return (
@@ -9,19 +10,4 @@ export default function SettingScreen(){
   );
 }
 
-interface Styles {
-  container: ViewStyle;
-  text: TextStyle;
-}
 
-const styles = StyleSheet.create<Styles>({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  text: {
-    fontSize: 15,
-  },
-});

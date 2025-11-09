@@ -3,12 +3,12 @@ import { NavigationContainer } from '@react-navigation/native';
 import {
   createBottomTabNavigator,
   BottomTabNavigationOptions,
+  
 } from '@react-navigation/bottom-tabs';
 import { Text } from 'react-native';
 import HomeScreen from './src/HomeScreen';
 import SettingScreen from './src/SettingScreen';
 
-// Määritellään välilehtien nimet ja tyypit
 export type RootTabParamList = {
   Koti: undefined;
   Asetukset: undefined;
