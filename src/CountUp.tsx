@@ -13,7 +13,7 @@ interface CountUpProps {
 export default function CountUp({
   from = 0,
   to,
-  duration = 1900,
+  duration = 100000,
   style,
   separator = '',
   onEnd,

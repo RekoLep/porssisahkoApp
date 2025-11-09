@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Dimensions, ActivityIndicator, ScrollView } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 
-//Noni, sen verran monimutkasta koodia, että lisäilen tänne mahdollisimman paljon kommentteja
+
 
 const LATEST_PRICES_ENDPOINT = 'https://api.porssisahko.net/v2/latest-prices.json';
 
@@ -22,7 +22,6 @@ const DailyPriceChart: React.FC = () => {
         const response = await fetch(LATEST_PRICES_ENDPOINT);
         const data = await response.json();
 
-        // Muodosta tänään Suomen aikaa
         const now = new Date();
         const todayLocal = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const todayUtc = new Date(todayLocal.getTime() - todayLocal.getTimezoneOffset() * 60000);
