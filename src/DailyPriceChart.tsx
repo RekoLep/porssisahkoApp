@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Dimensions, ActivityIndicator, ScrollView } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 
-
-
 const LATEST_PRICES_ENDPOINT = 'https://api.porssisahko.net/v2/latest-prices.json';
 
 interface PriceEntry {
@@ -13,7 +11,7 @@ interface PriceEntry {
 }
 
 const DailyPriceChart: React.FC = () => {
-  const [prices, setPrices] = useState<PriceEntry[]>([]);
+  const [prices, setPrices] = useState<{ time: string; price: number }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,20 +21,30 @@ const DailyPriceChart: React.FC = () => {
         const data = await response.json();
 
         const now = new Date();
-        const todayLocal = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const todayUtc = new Date(todayLocal.getTime() - todayLocal.getTimezoneOffset() * 60000);
-        const todayStr = todayUtc.toISOString().slice(0, 10);
 
-        // Suodata vain tämän päivän hinnat
-        const filtered = data.prices.filter((p: PriceEntry) => p.startDate.startsWith(todayStr));
+        // Päivän alku/loppu LOCAL ajassa (EI UTC)
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+        const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
 
-        // Järjestä aikajärjestykseen varmuuden vuoksi
-        filtered.sort(
-          (a: PriceEntry, b: PriceEntry) =>
-            new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
-        );
+        // Käydään läpi kaikki 192 varttia ja muunnetaan jokainen LOCAL-ajaksi
+        const todayEntries: { time: string; price: number }[] = [];
 
-        setPrices(filtered);
+        data.prices.forEach((p: PriceEntry) => {
+          const d = new Date(p.startDate);    // UTC → local automaattisesti
+          if (d >= todayStart && d <= todayEnd) {
+            const hh = String(d.getHours()).padStart(2, '0');
+            const mm = String(d.getMinutes()).padStart(2, '0');
+            todayEntries.push({
+              time: `${hh}:${mm}`,
+              price: p.price,
+            });
+          }
+        });
+
+        // Lajitellaan varmuuden vuoksi
+        todayEntries.sort((a, b) => a.time.localeCompare(b.time));
+
+        setPrices(todayEntries);
       } catch (err) {
         console.error('Virhe hintojen haussa', err);
       } finally {
@@ -60,22 +68,17 @@ const DailyPriceChart: React.FC = () => {
     return <Text>Ei hintatietoja tälle päivälle.</Text>;
   }
 
-  // Muodosta labelit Suomen ajassa
-  const labels = prices.map((p) => {
-    const date = new Date(p.startDate);
-    const localDate = new Date(date.getTime() + date.getTimezoneOffset() * -60000);
-    const hours = String(localDate.getHours()).padStart(2, '0');
-    const minutes = String(localDate.getMinutes()).padStart(2, '0');
-    return `${hours}:${minutes}`;
-  });
-
+  const labels = prices.map((p) => p.time);
   const dataValues = prices.map((p) => p.price);
 
   const screenWidth = Dimensions.get('window').width;
-  const chartWidth = screenWidth * 3; // hieman leveämpi, jotta scrollaus toimii hyvin
+  const chartWidth = screenWidth * 3;
 
-  // Harvenna näkyviä label-tekstejä (näytetään esim. 1/8)
-  const visibleLabels = labels.map((lbl, i) => (i % 8 === 0 ? lbl : ''));
+  const visibleLabels = labels.map((lbl) => {
+    const [h, m] = lbl.split(':').map(Number);
+    return m === 0 ? lbl : '';
+  });
+
 
   return (
     <View>
@@ -88,7 +91,7 @@ const DailyPriceChart: React.FC = () => {
           color: '#fff',
         }}
       >
-        Päivän sähkönhinnat snt/kWh (sis. alv)
+        Päivän sähkönhinnat snt/kWh (15 min)
       </Text>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -107,7 +110,6 @@ const DailyPriceChart: React.FC = () => {
             decimalPlaces: 2,
             color: (opacity = 1) => `rgba(0, 255, 127, ${opacity})`,
             labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            style: { borderRadius: 16 },
             propsForDots: { r: '2' },
           }}
           bezier
