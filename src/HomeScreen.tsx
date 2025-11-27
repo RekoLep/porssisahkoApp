@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
 import { fetchLatestPriceData } from './api/CurrentPriceApi';
 import CountUp from './CountUp';
 import DailyPriceChart from './DailyPriceChart'; 
+import NotificationForm from './NotificationForm';
+
 
 interface PriceItem {
   startDate: string;
@@ -14,13 +16,18 @@ interface PriceDataResponse {
   prices: PriceItem[];
 }
 
+
 export default function HomeScreen() {
   const [price, setPrice] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // UUSI TILA LOMAKKEEN NÄKYVYYDELLE
+  const [isFormVisible, setIsFormVisible] = useState(false);
 
   useEffect(() => {
     async function loadPrice() {
+      // ... (alkuperäinen hinnan latauslogiikka säilyy)
       try {
         const data: PriceDataResponse = await fetchLatestPriceData();
 
@@ -54,7 +61,7 @@ export default function HomeScreen() {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#2196f3" />
-        <Text>Ladataan hintaa...</Text>
+        <Text style={{ color: '#fff' }}>Ladataan hintaa...</Text>
       </View>
     );
   }
@@ -79,10 +86,28 @@ export default function HomeScreen() {
       />
       <Text style={styles.unitText}>snt / kWh (sis. alv)</Text>
 
-      
       <View style={styles.chartContainer}>
         <DailyPriceChart />
       </View>
+
+      {/* PAINIKE JA LOMAKE TILAUKSIA VARTEN */}
+      {isFormVisible ? (
+        // NÄYTÄ LOMAKE
+        <NotificationForm 
+            onSubscriptionSuccess={() => setIsFormVisible(false)} // Piilota lomake onnistuneen tilauksen jälkeen
+        />
+      ) : (
+        // NÄYTÄ PAINIKE
+        <TouchableOpacity 
+            style={styles.notificationButton} 
+            onPress={() => setIsFormVisible(true)}
+        >
+          <Text style={styles.notificationButtonText}>
+            Haluatko ilmoituksia pörssisähkön hinnasta?
+          </Text>
+        </TouchableOpacity>
+      )}
+      
     </View>
   );
 }
@@ -118,5 +143,16 @@ const styles = StyleSheet.create({
   chartContainer: {
     width: '100%',
     marginTop: 24,
+  },
+  // UUDET TYYLIT
+  notificationButton: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: '#16b004',
+    borderRadius: 5,
+  },
+  notificationButtonText: {
+    color: '#ffffff',
+    fontWeight: 'bold',
   },
 });
