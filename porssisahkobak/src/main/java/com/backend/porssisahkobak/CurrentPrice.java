@@ -1,4 +1,4 @@
-package com.backend.porssisahkobak; // Huom: Tarkista, että tämä paketti vastaa tiedostosi sijaintia
+package com.backend.porssisahkobak; 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
